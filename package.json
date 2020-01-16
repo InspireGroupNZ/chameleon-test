@@ -1,0 +1,29 @@
+{
+  "name": "todo",
+  "private": true,
+  "dependencies": {
+    "@babel/preset-react": "^7.8.3",
+    "@emotion/core": "^10.0.27",
+    "@mdx-js/react": "^1.5.4",
+    "@rails/actioncable": "^6.0.0",
+    "@rails/activestorage": "^6.0.0",
+    "@rails/ujs": "^6.0.0",
+    "@rails/webpacker": "4.2.2",
+    "@theme-ui/components": "^0.2.50",
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "@types/theme-ui__components": "^0.2.0",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "prop-types": "^15.7.2",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "theme-ui": "^0.2.52",
+    "ts-loader": "^6.2.1",
+    "turbolinks": "^5.2.0",
+    "typescript": "^3.7.4"
+  },
+  "version": "0.1.0",
+  "devDependencies": {
+    "webpack-dev-server": "^3.10.1"
+  }
+}
