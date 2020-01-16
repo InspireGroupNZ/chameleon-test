@@ -2,7 +2,10 @@
 
 This is a ruby on rails code challenge. It is a simple todo application. 
 
-Its is intentionally made to be rough, and there are two parts to the challenge
+it uses the basic rails new with webpack=react and a couple of front end library and devise for auth.
+
+The challenge involves 2 parts, a quick read and understand and a small amount of coding. We are looking 
+to see how well you can understand and work with rails, and also how you think about what you are doing.
 
 ## Part 1. 
 
@@ -14,14 +17,14 @@ Jot down 2 - 3 points about what you would do to make the app better without add
 
 ## Part 2. 
 
-Clone the repo, create a new branch. 
+Fork the repo and create a new branch. 
 
-Implement 1 or more feature of your choice. Don't spend more than hour on it, and you don't need to finish the feature, 
+Implement 1 or more feature of your choice. Don't spend more than hour or 2 on it, 
 just enough so that you think you have showed us what you can do. 
 
 some suggestions include
 
-- enable the ability to delete a todo (front end as well)
+- enable the ability to delete a todo
 - create an admin user that can see all users todos 
 - provide a search capability todo's
 
