@@ -7,6 +7,13 @@ This is a ruby on rails code challenge. It is a simple todo application.
 standard rails using 6.0.2.1. Make sure you have node >= 10 installed to run webpack which is needed from 
 the front end.
 
+basic install:
+
+```
+bundle install 
+yarn install 
+rails s 
+```
 ---
 
 it uses the basic rails new with webpack=react and a couple of front end library and devise for auth.
