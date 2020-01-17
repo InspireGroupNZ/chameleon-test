@@ -40,3 +40,6 @@ but you can do whatever you think provides value.
 You can submit a question as an issue on the github
 
 once you have finished, submit a pull request. 
+
+NOTE: if you can't get it running, just write some code and pretend that it works. 
+more interested in seeing your code rather than having working code. 
