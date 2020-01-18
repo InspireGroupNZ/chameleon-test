@@ -13,3 +13,8 @@
  *= require_tree .
  *= require_self
  */
+
+ /* Added Styling Rule to add Strikethrough to Checked Items */
+ input[type=checkbox]:checked + label.strikethrough{
+    text-decoration: line-through;
+  }

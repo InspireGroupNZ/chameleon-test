@@ -1,0 +1,26 @@
+<div class="container border mt-4">
+    <%= render 'header' %>
+        <div class="container my-2">
+            <% @todo_item.each do |todo| %>
+                <input type="checkbox"><label class="strikethrough"><%= link_to todo.content, todo_item_path(todo.id), class: "h5" %></label><br>
+                <%= link_to " Edit |", edit_todo_item_path(todo[:id]), class: "font-weight-bold text-warning h6" %>
+                <%= link_to "Delete", todo, method: :delete, data: { confirm: "Are you sure you wish to delete #{todo.content}?" }, class: "font-weight-bold text-danger h6" %>
+                <br><br>
+            <% end %>
+        </div>
+        <div class="container">
+            <%= link_to "New To-do Item", new_todo_item_path, class: "font-weight-bold btn btn-success" %>
+        </div>
+        <%# Search Bar for To-do Items %>
+        
+        <div class="container py-4">
+        <%= form_tag todo_items_path, method: :get do %>
+        <%= text_field_tag :query,
+            params[:query],
+            class: "form-control search-form",
+            placeholder: "Find a To-do Item"
+        %>
+        <%= submit_tag "Search", class: "my-4 btn btn-primary" %>
+        <% end %>
+        </div>
+</div>

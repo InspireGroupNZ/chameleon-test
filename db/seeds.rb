@@ -5,3 +5,17 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+puts 'Cleaning Database..'
+todos = TodoItem.create([
+  {content: "Watch Brooklyn-99"},
+
+  {content: "Wash the Car"},
+
+  {content: "Learn TypeScript"},
+
+  {content: "Work on Mini-Project"},
+
+  {content: "Walk the Cat"}
+
+   ])
+puts "Finished Seeding #{todos.length} Todo Items!"

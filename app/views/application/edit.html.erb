@@ -1,0 +1,11 @@
+<div class="container border my-4 py-3">
+    <%= render 'header' %>
+    <h3 class="text-primary">Edit Your To-do</h3>
+    <%= form_for @todo_item do |f| %>
+
+    <%= label_tag(:content, "Content:") %>
+    <%= f.text_field :content %></br>
+
+    <%= f.submit "Update", class: "btn btn-primary"  %>
+    <% end %>
+</div>

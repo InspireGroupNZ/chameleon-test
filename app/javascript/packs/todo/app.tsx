@@ -137,6 +137,12 @@ export const App = () => {
             Create
           </Button>
         </Box>
+        {/* Attempt at using TypeScript + React to add the Delete Functionality - deleteTodo has the required logic, wasn't able to work out how to connect that logic to the Delete Button using TypeScript/React
+        <Box>
+          <Button mt={2} onClick={() => deleteTodo({ id: todos }).then(() => setTodos(""))}>
+            Delete
+          </Button>
+        </Box> */}
       </Container>
     </ThemeProvider>
   )

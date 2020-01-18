@@ -1,0 +1,7 @@
+<div class="container border mt-4">
+    <%= render 'header' %>
+    <p><strong class="text-primary">To-Do Content:</strong> <%= @todo_item['content'] %></p>
+    <p><strong class="text-primary">Created At:</strong> <%= @todo_item['created_at']%></p>
+
+    <%= link_to "Back To To-do List",todo_items_path%>
+</div>
