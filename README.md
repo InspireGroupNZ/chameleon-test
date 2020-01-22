@@ -4,7 +4,7 @@ This is a ruby on rails code challenge. It is a simple todo application.
 
 ## Installation
 
-standard rails using 6.0.2.1. Make sure you have node >= 10 installed to run webpack which is needed from 
+standard rails using 6.0.2.1. Make sure you have node >= 10 installed to run webpacker which is needed from 
 the front end.
 
 basic install:
@@ -23,30 +23,24 @@ to see how well you can understand and work with rails, and also how you think a
 
 ## Part 1. 
 
-Spend 10 - 15 mins (short) and read through the app and get an understanding of what is going on. 
+Read through the app and get an understanding of how its setup
 
 Jot down 2 - 3 points that you like about it, or has been done well, and why
 
-Jot down 2 - 3 points about what you would do to make the app better without adding any new features and why. 
+Jot down 2 - 3 points about what you would do to move the app forward without adding any new features and why. 
 
 ## Part 2. 
 
 Fork the repo and create a new branch. 
 
-Implement 1 or more feature of your choice. Don't spend more than hour or so on it, 
+Implement 1 or more feature of your choice. Don't spend more than hour or 2  on it, 
 just enough so that you think you have showed us what you can do. 
 
-some suggestions include
-
-- enable the ability to delete a todo
-- create an admin user that can see all users todos 
-- provide a search capability todo's
-
-but you can do whatever you think provides value. 
+The key is try and focus on what you think could provide an end user value.
 
 You can submit a question as an issue on the github
 
-once you have finished, submit a pull request. 
+Once you have finished, submit a pull request. 
 
 NOTE: if you can't get it running, just write some code and pretend that it works. 
 more interested in seeing your code rather than having working code. 

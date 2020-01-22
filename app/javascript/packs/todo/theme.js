@@ -10,7 +10,7 @@ export const base = {
   radii: [0, 4, 8, 16, 32, 64, 96, 128, 256, 512],
   fonts: {
     body: '"Poppins", sans-serif',
-    heading: 'inherit',
+    heading: '"Poppins", sans-serif',
     monospace: 'Menlo, monospace',
   },
   sizes: {

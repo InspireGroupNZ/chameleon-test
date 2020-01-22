@@ -9,8 +9,10 @@ import {
   Container,
   Checkbox,
   Flex,
-  Label
+  Label,
+  Text
 } from '@theme-ui/components'
+import { Global } from '@emotion/core'
 
 interface Todo {
   id?: number
@@ -33,8 +35,7 @@ export const App = () => {
   const createTodo = (todo) => {
     return fetch("/api/todo_items", {
       method: 'POST',
-
-      credentials: 'same-origin', // include, *same-origin, omit
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -52,7 +53,7 @@ export const App = () => {
   const deleteTodo = (todo) => {
     return fetch(`/api/todo_items/${todo.id}`, {
       method: 'DELETE',
-      credentials: 'same-origin', // include, *same-origin, omit
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -74,7 +75,7 @@ export const App = () => {
     return fetch(`/api/todo_items/${todo.id}`, {
       method: 'PUT',
 
-      credentials: 'same-origin', // include, *same-origin, omit
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -97,10 +98,29 @@ export const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <Global
+        styles={theme => ({
+          html: { margin: 0, padding: 0 },
+          body: {
+            margin: 0, padding: 0,
+            color: theme.colors.text,
+            backgroundColor: theme.colors.background,
+          }
+        })}
+      />
+      <Box sx={{
+        bg: 'background',
+        boxShadow: '0 0 10px -4px #000'
+      }}>
+        <Container>
+          <Heading>
+            Todo
+          </Heading>
+        </Container>
+      </Box>
+
       <Container>
-        <Heading>
-          Todo
-      </Heading>
+
         <Box py={3}>
           <Box
             as="ul"
@@ -113,11 +133,14 @@ export const App = () => {
             {todos.map((t) => {
               return (
                 <Flex key={t.id} as='li' py={2} sx={{ alignItems: 'center', textDecoration: !!(t as any).completed_at ? "line-through" : "none" }}>
-                  <span><Label>
+
+                  <Flex as="label" sx={{ alignItems: 'center' }}>
                     <Checkbox checked={!!(t as any).completed_at} onChange={(e) => {
                       completeTodo(t, e.target.checked)
-                    }} /></Label></span>
-                  {t.content}
+                    }} />
+                    <Text as="span" sx={{ fontFamily: 'body' }}>{t.content}</Text>
+                  </Flex>
+
                 </Flex>
               )
             })}
@@ -131,6 +154,7 @@ export const App = () => {
             sx={{
               maxWidth: 420,
               borderRadius: 2,
+              fontFamily: 'body'
             }}
           />
           <Button mt={2} onClick={() => createTodo({ content: newText }).then(() => setNewText(""))}>
