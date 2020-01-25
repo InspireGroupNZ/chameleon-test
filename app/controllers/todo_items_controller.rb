@@ -4,29 +4,20 @@ class TodoItemsController < ApplicationController
   end
 
   def create
-    todo = TodoItem.new todo_item_params
-    current_user.todo_items << todo
-
-    render json: todo
+    begin
+      render json: TodoItemsManager::TodoItemCreator.call(current_user, todo_item_params)
+    rescue
+      puts "You tried to create a Todo item with an empty string"
+    end
   end
 
   def update
-    todo = TodoItem.find params[:id]
-    todo.update todo_item_params
-
-    if not todo_item_params["completed_at"]
-      todo.completed_at = nil
-    end
-
-    todo.save!
-
+    todo = TodoItemsManager::TodoItemUpdater.call(params, todo_item_params)
     render json: todo
   end
 
   def destroy
-    todo = TodoItem.find params[:id]
-    todo.destroy
-
+    todo = TodoItemsManager::TodoItemDestroyer.call(params)
     render json: todo
   end
 

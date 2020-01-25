@@ -1,11 +1,90 @@
 # Notes on System
 
-## Things Done Well
+## Notable Details
+
+### Postgres on production, SQLite3 for development.
+
+It is a lot simpler to get going with a SQLite3 database in Rails, and the risk of something working in the development database on a local machine, but not working in the Postgres database in production is small.
+
+Nevertheless, I wonder whether it is a better policy to use the same database system across the board.
+
+### Test instead of RSpec
+
+RSpec is my go-to unit testing framework.  As far as I can tell, it is the most popular.  As you can see, I took the liberty of installing RSpec in order to write a few unit tests, rather than familiarise myself with a new framework for this test.
+
+At work, though, I use the tools that are already there.
 
 ## Proposed Improvements
 
-### TodoItem.content should not accept "null"
 
+### FRONTEND: Move cursor back to `<textarea>` after creating a Todo item
+
+```
+As a User
+GIVEN I have entered text in the <textarea>
+WHEN I click the "Create" button
+THEN a new Todo item should be created
+AND the cursor should return to the <textarea>
+
+```
+
+### BACKEND: Use Service Objects for `TodoItemsController`
+
+```
+As a developer,
+In order to keep my Controllers from getting fat,
+I want to keep the bulk of the logic in Service Objects,
+And call the Service Objects from the Controllers.
+```
+
+I applied this principle to `TodoItemsController`:
+
+1. Create the directory `app/services/todo_items_manager`
+2. Create a separate Service Object for each controller instance method
+   1. `#create` => `TodoItemsManager::TodoItemCreator`
+   1. `#update` => `TodoItemsManager::TodoItemUpdater`
+   1. `#destroy` => `TodoItemsManager::TodoItemDestroyer`
+
+Every Service Object class inherits the following method from ApplicationService:
+
+```ruby
+class ApplicationService
+  def self.call(*args, &block)
+    new(*args, &block).call
+  end
+end
+```
+
+Thus every service object has a main Class method `#call`, and because the `TodoItemsController` methods return `rendor json: todo` (even `#destroy`), the `#call` method always returns the `todo` variable after performing its operation.
+
+For example, `TodoItemsManager::TodoItemCreator.call`:
+
+```ruby
+def call
+  todo = TodoItem.new(@todo_item_params)
+  # Ensure that an empty string is passed to SQLite3 as NULL
+  todo.content = todo.content.presence
+  @current_user.todo_items << todo
+  todo
+end
+```
+
+**NOTE**: See the following proposal for details about this line:
+
+```ruby
+# Ensure that an empty string is passed to SQLite3 as NULL
+todo.content = todo.content.presence
+```
+
+### BACKEND: `TodoItem.content` should not accept "null"
+
+```
+As a User,
+GIVEN I have not entered text in the <textarea>
+WHEN I click the "Create" button
+THEN a new Todo item should NOT be created
+AND the cursor should return to the <textarea>
+```
 #### What is the problem?
 
 It is possible to create a useless TodoItem -- one without content.
@@ -80,24 +159,34 @@ Which means that `TodoItemsController#create` will pass `''` to the database ent
 
 #### FIX Part 2: TodoItemsController
 
-Therefore, to ensure that an empty string is passed to the database as NULL, even if the UI sends a payload with an empty string, we need to amend the controller too:
+Therefore, to ensure that an empty string is passed to the database as NULL, even if the UI sends a payload with an empty string, we need to amend `TodoItemsManager::TodoItemCreator#call`:
+
+`app/services/todo_items_manager/todo_item_creator.rb`
+
+```ruby
+def call
+  todo = TodoItem.new(@todo_item_params)
+  # Ensure that an empty string is passed to SQLite3 as NULL
+  todo.content = todo.content.presence
+  @current_user.todo_items << todo
+  todo
+end
+```
+
+And then we need to have `#rescue` for when `todo.content.presence` returns `nil`:
 
 `app/controllers/todo_items_controller.rb`
 
 ```ruby
 def create
-  todo = TodoItem.new todo_item_params
-  # Ensure that an empty string is passed to SQLite3 as NULL
-  todo.content = todo.content.presence
-  
-  # Ensure that a 204 error rather than a 500 error is returned
   begin
-    current_user.todo_items << todo
-  rescue Exception
-    puts "You tried to create a Todo with an empty string: #{Exception}"
-    return Exception
+    render json: TodoItemsManager::TodoItemCreator.call(current_user, todo_item_params)
+  rescue
+    puts "You tried to create a Todo item with an empty string"
   end
 ```
+
+This way, if a request is valid, it returns **200**, and if it is invalidated by its empty content, the server will return **204** instead of **500**.
 
 #### Backend Solution != Full Stack Solution
 
@@ -114,4 +203,5 @@ However, with these changes in place, the backend ensures the best possible user
 - Deactive the Create button until the `<textarea>` has some text.
 - Add a tooltip over the deactivated button.
 - Require a minimum number of characters for the `<textarea>`
+
 

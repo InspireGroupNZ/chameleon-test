@@ -27,8 +27,6 @@ gem 'bootsnap', '>= 1.4.2', require: false
 
 # NOTE: alexander garber
 gem 'guard-rspec'
-# NOTE: alexander garber
-gem 'faraday'
 
 group :development, :test do
   gem 'pry'
