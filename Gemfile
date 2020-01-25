@@ -25,7 +25,19 @@ gem "pundit"
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.2', require: false
 
+# NOTE: alexander garber
+gem 'guard-rspec'
+# NOTE: alexander garber
+gem 'faraday'
+
 group :development, :test do
+  gem 'pry'
+  gem 'pry-rails'
+  gem 'pry-remote'
+  # NOTE: alexander garber
+  gem 'rspec-rails'
+  # NOTE: alexander garber
+  gem 'guard-rails'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Use sqlite3 as the database for Active Record Local
