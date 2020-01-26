@@ -4,18 +4,15 @@
 
 ### Postgres on production, SQLite3 for development.
 
-It is a lot simpler to get going with a SQLite3 database in Rails, and the risk of something working in the development database on a local machine, but not working in the Postgres database in production is small.
-
-Nevertheless, I wonder whether it is a better policy to use the same database system across the board.
+Easier to set up on a local machine, but always runs the risk of something working on local that fails in production.
 
 ### Test instead of RSpec
 
-RSpec is my go-to unit testing framework.  As far as I can tell, it is the most popular.  As you can see, I took the liberty of installing RSpec in order to write a few unit tests, rather than familiarise myself with a new framework for this test.
+RSpec is the only unit testing framework that I am familiar with in Ruby, which is why I added it the Gemfile for my unit tests.
 
-At work, though, I use the tools that are already there.
+At work, if required, I would use the established testing framework.
 
 ## Proposed Improvements
-
 
 ### FRONTEND: Move cursor back to `<textarea>` after creating a Todo item
 
@@ -25,7 +22,6 @@ GIVEN I have entered text in the <textarea>
 WHEN I click the "Create" button
 THEN a new Todo item should be created
 AND the cursor should return to the <textarea>
-
 ```
 
 ### BACKEND: Use Service Objects for `TodoItemsController`
@@ -55,9 +51,15 @@ class ApplicationService
 end
 ```
 
-Thus every service object has a main Class method `#call`, and because the `TodoItemsController` methods return `rendor json: todo` (even `#destroy`), the `#call` method always returns the `todo` variable after performing its operation.
+Thus all the logic is accessible in a one-line method call, which returns the variable `todo` to be rendered.
 
-For example, `TodoItemsManager::TodoItemCreator.call`:
+For example, within `TodoItemsController#create` this line...
+
+```ruby
+render json: TodoItemsManager::TodoItemCreator.call(current_user, todo_item_params)
+```
+
+...invokes `TodoItemsManager::TodoItemCreator.call`:
 
 ```ruby
 def call
@@ -69,7 +71,7 @@ def call
 end
 ```
 
-**NOTE**: See the following proposal for details about this line:
+**NOTE**: this line is the subject of the next proposal.
 
 ```ruby
 # Ensure that an empty string is passed to SQLite3 as NULL
@@ -155,11 +157,11 @@ However, this does not solve the problem that it is possible for the end-user to
 {"todo_item":{"content":""}}
 ```
 
-Which means that `TodoItemsController#create` will pass `''` to the database entry rather than `NULL`.
+This means that in `TodoItemsController#create` the variable `todo.content` will be `''` instead of `nil`.
 
 #### FIX Part 2: TodoItemsController
 
-Therefore, to ensure that an empty string is passed to the database as NULL, even if the UI sends a payload with an empty string, we need to amend `TodoItemsManager::TodoItemCreator#call`:
+Therefore, `TodoItemsController#create` needs to pass `todo.content.presence` rather than `todo.content`, in order to ensure that a POST request payload of `{"todo_item":{"content":""}}` is passed to the database as `NULL`.
 
 `app/services/todo_items_manager/todo_item_creator.rb`
 
@@ -172,8 +174,7 @@ def call
   todo
 end
 ```
-
-And then we need to have `#rescue` for when `todo.content.presence` returns `nil`:
+Finally, because passing `NULL` to the database will raise an error, we need a `#rescue` for when `todo.content.presence` returns `nil`:
 
 `app/controllers/todo_items_controller.rb`
 
@@ -186,7 +187,7 @@ def create
   end
 ```
 
-This way, if a request is valid, it returns **200**, and if it is invalidated by its empty content, the server will return **204** instead of **500**.
+This way, if a request is valid, it returns the same **200** response, and if it is invalidated by its empty content, the server will return **204** instead of **500**.
 
 #### Backend Solution != Full Stack Solution
 
