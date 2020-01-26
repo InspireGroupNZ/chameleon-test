@@ -6,15 +6,50 @@
 
 Easier to set up on a local machine, but always runs the risk of something working on local that fails in production.
 
+### Failed login attempt problems
+
+```
+GIVEN the user account "test@test.com" does not exist in `users`
+WHEN I attempt to log in with "test@test.com"
+THEN the POST response status code should be 401
+AND the UI should inform the user of a failed login attempt
+```
+
+### No logout, user permanently logged in
+
+Login button missing.
+
+```
+WHEN logged in with a valid account
+THEN there should be a "Log Out" button
+```
+
+No way of testing in the UI whether clicking the "Log Out" button would redirect to the login page.
+```
+GIVEN logged in with a valid account
+WHEN I click the "Log Out" button
+THEN my authentication token should be invalidated
+AND I should be redirected to the login page
+```
+
+### No OmniAuthentication
+
+```
+As a user, 
+I want to be able to sign in to the app with my OpenID account
+
+GIVEN I have a Google or Inspire account
+WHEN I navigate to the login page of this app
+THEN I should have the option to log in using my Google account or Inspire account to log in to this app
+```
+
 ### Test instead of RSpec
 
 RSpec is the only unit testing framework that I am familiar with in Ruby, which is why I added it the Gemfile for my unit tests.
 
 At work, if required, I would use the established testing framework.
 
-## Proposed Improvements
-
-### FRONTEND: Move cursor back to `<textarea>` after creating a Todo item
+### Cursor placement after creating a Todo item
 
 ```
 As a User
@@ -23,6 +58,10 @@ WHEN I click the "Create" button
 THEN a new Todo item should be created
 AND the cursor should return to the <textarea>
 ```
+
+Low priority, the cursor can be returned via the keyboard shortcut `LEFT_SHIFT + TAB`.
+
+## Improvements
 
 ### BACKEND: Use Service Objects for `TodoItemsController`
 
@@ -78,7 +117,7 @@ end
 todo.content = todo.content.presence
 ```
 
-### BACKEND: `TodoItem.content` should not accept "null"
+### `TodoItem.content` should not accept "null"
 
 ```
 As a User,
