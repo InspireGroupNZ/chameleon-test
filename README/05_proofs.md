@@ -1,4 +1,4 @@
-# README ADDENDUM
+# PROOFS
 
 The following are different proofs that a TodoItem can be created without any content.
 
