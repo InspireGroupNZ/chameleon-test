@@ -1,4 +1,4 @@
-# TodoItem Addendum
+# README ADDENDUM
 
 The following are different proofs that a TodoItem can be created without any content.
 
@@ -60,7 +60,7 @@ curl --request POST \
   --data '{"todo_item":{"content":""}}'
 ```
 
-## User Interface
+## Dev Tools Network History
 
 And it can even be performed in the UI, where if a logged-in user clicks Create, an empty Todo item is added to the screen with the following POST response:
 

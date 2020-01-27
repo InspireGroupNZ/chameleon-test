@@ -1,36 +1,27 @@
-# Notes on System
+# README by Alexander Garber
 
-## Notable Details
+## Observations
 
 ### Postgres on production, SQLite3 for development.
 
 Easier to set up on a local machine, but always runs the risk of something working on local that fails in production.
 
-### Failed login attempt problems
+### Failed Sign-in attempt problems
 
 ```
 GIVEN the user account "test@test.com" does not exist in `users`
 WHEN I attempt to log in with "test@test.com"
 THEN the POST response status code should be 401
-AND the UI should inform the user of a failed login attempt
+AND the UI should inform the user of a failed Sign-in attempt
 ```
 
-### No logout, user permanently logged in
+However:
+1. The POST response status code is **200**.
+2. The UI gives no indication of any of the following:
+   1. Account does not exist.
+   2. Wrong email.
+   3. Wrong password.
 
-Login button missing.
-
-```
-WHEN logged in with a valid account
-THEN there should be a "Log Out" button
-```
-
-No way of testing in the UI whether clicking the "Log Out" button would redirect to the login page.
-```
-GIVEN logged in with a valid account
-WHEN I click the "Log Out" button
-THEN my authentication token should be invalidated
-AND I should be redirected to the login page
-```
 
 ### No OmniAuthentication
 
@@ -39,9 +30,11 @@ As a user,
 I want to be able to sign in to the app with my OpenID account
 
 GIVEN I have a Google or Inspire account
-WHEN I navigate to the login page of this app
+WHEN I navigate to the Sign-in page of this app
 THEN I should have the option to log in using my Google account or Inspire account to log in to this app
 ```
+
+I have experience in testing OmniAuthentication, but not enough to confidently apply it to this project in the limited time available.
 
 ### Test instead of RSpec
 
@@ -63,68 +56,100 @@ Low priority, the cursor can be returned via the keyboard shortcut `LEFT_SHIFT +
 
 ## Improvements
 
-### BACKEND: Use Service Objects for `TodoItemsController`
+### FRONTEND: Sign-in/Sign-out links
+
+#### Missing features
 
 ```
-As a developer,
-In order to keep my Controllers from getting fat,
-I want to keep the bulk of the logic in Service Objects,
-And call the Service Objects from the Controllers.
+WHEN logged in with a valid account
+THEN there should be a "Sign out" link
 ```
 
-I applied this principle to `TodoItemsController`:
+AND
 
-1. Create the directory `app/services/todo_items_manager`
-2. Create a separate Service Object for each controller instance method
-   1. `#create` => `TodoItemsManager::TodoItemCreator`
-   1. `#update` => `TodoItemsManager::TodoItemUpdater`
-   1. `#destroy` => `TodoItemsManager::TodoItemDestroyer`
+```
+WHEN logged out
+THEN there should a "Sign in" link.
+```
 
-Every Service Object class inherits the following method from ApplicationService:
+#### Note about the solution
+
+Although one of my top priorities is to upskill in React, the solution below uses the expedient of Rails **View** templates instead of **React**, because I am focusing on the backend, the database, and APIs.
+
+#### Solution
+
+Created the sub-directory `app/views/devise/menu` and two `html.erb` templates:
+
+`app/views/devise/menu/_login_items.html.erb`
+
+```
+<% if user_signed_in? %>
+  <li>
+  <%= link_to('Logout', destroy_user_session_path, method: :delete) %>        
+  </li>
+<% else %>
+  <li>
+  <%= link_to('Login', new_user_session_path) %>  
+  </li>
+<% end %>
+```
+
+`app/views/devise/menu/_registration_items.html.erb`
+
+```
+<% if user_signed_in? %>
+  <li>
+  <%= link_to('Edit registration', edit_user_registration_path) %>
+  </li>
+<% else %>
+  <li>
+  <%= link_to('Register', new_user_registration_path) %>
+  </li>
+<% end %>
+```
+
+Changed the HTTP method for signing out from DELETE to GET in `config/initializers/devise.rb`:
 
 ```ruby
-class ApplicationService
-  def self.call(*args, &block)
-    new(*args, &block).call
-  end
-end
+config.sign_out_via = :get
 ```
 
-Thus all the logic is accessible in a one-line method call, which returns the variable `todo` to be rendered.
+Added the templates to `app/views/layouts/application.html.erb`:
 
-For example, within `TodoItemsController#create` this line...
-
-```ruby
-render json: TodoItemsManager::TodoItemCreator.call(current_user, todo_item_params)
+```
+<ul class="hmenu">
+  <%= render 'devise/menu/registration_items' %>
+  <%= render 'devise/menu/login_items' %>
+</ul>
+<%= yield %>
 ```
 
-...invokes `TodoItemsManager::TodoItemCreator.call`:
+And added some menu styling to `app/assets/stylesheets/application.css` to make links slightly less ugly:
 
-```ruby
-def call
-  todo = TodoItem.new(@todo_item_params)
-  # Ensure that an empty string is passed to SQLite3 as NULL
-  todo.content = todo.content.presence
-  @current_user.todo_items << todo
-  todo
-end
+```
+ul.hmenu {
+  list-style: none;	
+  margin: 0 0 2em;
+  padding: 0;
+}
+
+ul.hmenu li {
+  display: inline;  
+}
 ```
 
-**NOTE**: this line is the subject of the next proposal.
+#### Result
+1. Link on the home page to sign in as a valid user
+2. Link available to sign out of a session
+3. Easier for me to observe the sign-in and sign-out API calls.
 
-```ruby
-# Ensure that an empty string is passed to SQLite3 as NULL
-todo.content = todo.content.presence
-```
-
-### `TodoItem.content` should not accept "null"
+### DATABASE: `TodoItem.content` should not accept "null"
 
 ```
 As a User,
 GIVEN I have not entered text in the <textarea>
 WHEN I click the "Create" button
 THEN a new Todo item should NOT be created
-AND the cursor should return to the <textarea>
 ```
 #### What is the problem?
 
@@ -145,9 +170,9 @@ create_table "todo_items", force: :cascade do |t|
 end
 ```
 
-The consequence of `t.string content` not including `null: false` is demonstrated in the file *NOTES_ADDENDUM.md* in RSpec, cURL, and the Rails Console.
+The consequence of `t.string content` not including `null: false` is demonstrated in the file *README_ALEXANDER_GARBER_ADDENDUM.md* in RSpec, cURL, the Rails Console, and the Dev Tools Network history.
 
-#### FIX Part 1: Database Migration
+#### Attempted Fix: Database Migration
 
 `generate` a migration:
 
@@ -198,9 +223,68 @@ However, this does not solve the problem that it is possible for the end-user to
 
 This means that in `TodoItemsController#create` the variable `todo.content` will be `''` instead of `nil`.
 
-#### FIX Part 2: TodoItemsController
 
-Therefore, `TodoItemsController#create` needs to pass `todo.content.presence` rather than `todo.content`, in order to ensure that a POST request payload of `{"todo_item":{"content":""}}` is passed to the database as `NULL`.
+### BACKEND: Service Objects for `TodoItemsController`
+
+The changes to the backend address the following two User Stories:
+
+```
+As a User,
+GIVEN I have not entered text in the <textarea>
+WHEN I click the "Create" button
+THEN a new Todo item should NOT be created
+```
+
+AND 
+
+```
+As a developer,
+In order to keep my Controllers from getting fat,
+I want to keep the bulk of the logic in Service Objects,
+And call the Service Objects from the Controllers.
+```
+
+#### Service Objects
+
+1. Create the directory `app/services/todo_items_manager`
+2. Create a separate Service Object for each controller instance method
+   1. `#create` => `TodoItemsManager::TodoItemCreator`
+   1. `#update` => `TodoItemsManager::TodoItemUpdater`
+   1. `#destroy` => `TodoItemsManager::TodoItemDestroyer`
+
+Every Service Object class inherits the following method from ApplicationService:
+
+```ruby
+class ApplicationService
+  def self.call(*args, &block)
+    new(*args, &block).call
+  end
+end
+```
+
+Thus all the logic is accessible in a one-line method call, which returns the variable `todo` to be rendered.
+
+For example, within `TodoItemsController#create` this line...
+
+```ruby
+render json: TodoItemsManager::TodoItemCreator.call(current_user, todo_item_params)
+```
+
+...invokes `TodoItemsManager::TodoItemCreator.call`:
+
+```ruby
+def call
+  todo = TodoItem.new(@todo_item_params)
+  # Ensure that an empty string is passed to SQLite3 as NULL
+  todo.content = todo.content.presence
+  @current_user.todo_items << todo
+  todo
+end
+```
+
+#### Pass `NULL` to the database instead of an empty string
+
+`TodoItemsController#create` needs to pass `todo.content.presence` rather than `todo.content`, in order to ensure that a POST request payload of `{"todo_item":{"content":""}}` is passed to the database as `NULL`.
 
 `app/services/todo_items_manager/todo_item_creator.rb`
 
@@ -213,7 +297,8 @@ def call
   todo
 end
 ```
-Finally, because passing `NULL` to the database will raise an error, we need a `#rescue` for when `todo.content.presence` returns `nil`:
+
+However, because passing `NULL` to the database will raise an error, we need a `#rescue` for when `todo.content.presence` returns `nil`:
 
 `app/controllers/todo_items_controller.rb`
 
@@ -243,5 +328,3 @@ However, with these changes in place, the backend ensures the best possible user
 - Deactive the Create button until the `<textarea>` has some text.
 - Add a tooltip over the deactivated button.
 - Require a minimum number of characters for the `<textarea>`
-
-
